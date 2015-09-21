@@ -1,0 +1,22 @@
+.envrc
+
+*.o
+*.a
+/src/umackereld
+
+# autotools
+*.log
+*.status
+Makefile
+Makefile.in
+aclocal.m4
+stamp-*
+*.cache/
+/config.h
+/config.h.in
+/configure
+/compile
+/depcomp
+/install-sh
+/missing
+.deps/
