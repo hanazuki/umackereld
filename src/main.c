@@ -97,7 +97,6 @@ struct hostspec collect_hostspec() {
 }
 
 static void hostspec_timeout_handler(struct uloop_timeout *t) {
-  DEBUG_ENTER;
   (void)t;  // == &hostspec_timeout
 
   assert(mackerel_client);
@@ -109,22 +108,26 @@ static void hostspec_timeout_handler(struct uloop_timeout *t) {
   } else {
     mackerel_create_host(mackerel_client, &hostspec, create_host_callback, NULL);
   }
-  DEBUG_EXIT;
+}
+
+static void collect_custom_metrics(struct metric_options options) {
+  if(options.command) {
+    metrics_collect_custom(metrics_add, options.command);
+  }
 }
 
 static void metrics_timeout_handler(struct uloop_timeout *t) {
-  DEBUG_ENTER;
   (void)t;  // == &metrics_timeout
 
   metrics_collect_loadavg5(metrics_add);
+  foreach_metric_config(collect_custom_metrics);
   mackerel_update_metrics(mackerel_client, hostid, metrics_flush(), NULL, NULL);
 
   schedule_metrics_update(metrics_update_interval);
-  DEBUG_EXIT;
 }
 
 int main() {
-  ulog_open(ULOG_STDIO, LOG_USER, PACKAGE_NAME);
+  ulog_open(ULOG_SYSLOG, LOG_USER, PACKAGE_NAME);
 
   if (curl_global_init(CURL_GLOBAL_DEFAULT) != 0) {
     ULOG_ERR("curl_global_init failed\n");

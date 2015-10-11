@@ -41,9 +41,19 @@ make
 Only `mackerel.apikey` option is mandatory.
 
 ```
+# Global configuration
 config mackerel
+  # Your API key, issued by mackerel.io (mandatory)
   option apikey 'YOUR_API_KEY'
+
+  # Hostname is by default obtained from the kernel. You can override it.
   option hostname 'override.hostname.localdomain'
+
+# Custom metrics (any number of sections allowed)
+config metric
+  # The command must output lines in the format: "<name>\t<value>\t<time>\n"
+  # The command string is passed to `sh -c`, so be careful to the shell-sensitive characters.
+  option command '/path/to/your/metrics/command.sh'
 ```
 
 ## License

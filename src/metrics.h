@@ -10,5 +10,6 @@ void metrics_add(time_t time, json_object *name, json_object *value);
 json_object *metrics_flush();
 
 void metrics_collect_loadavg5(collector_callback yield);
+void metrics_collect_custom(collector_callback yield, char const *command);
 
 #endif

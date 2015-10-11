@@ -69,3 +69,21 @@ error:
 
   return -1;
 }
+
+int foreach_metric_config(void (*cb)(struct metric_options options)) {
+  if(!uci_package) {
+    ULOG_ERR("Config package is not loaded.\n");
+    return -1;
+  }
+
+  struct uci_element *p;
+  uci_foreach_element(&uci_package->sections, p) {
+    struct uci_section *section = uci_to_section(p);
+    if(strcmp(section->type, "metric") == 0) {
+      char const *command = uci_lookup_option_string(uci_context, section, "command");
+      cb((struct metric_options){.command=command});
+    }
+  }
+
+  return 0;
+}
