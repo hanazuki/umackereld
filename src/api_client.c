@@ -25,17 +25,14 @@ static void check_multi_info(CURLM *curlmulti);
 static void socket_handler(struct uloop_fd *u, unsigned int events) {
   // DEBUG("enter");
   struct socket_info *sockinfo = container_of(u, struct socket_info, ufd);
-  unsigned const flags = (events & ULOOP_READ ? CURL_POLL_IN : 0) |
-                         (events & ULOOP_WRITE ? CURL_POLL_OUT : 0);
+  unsigned const flags = (events & ULOOP_READ ? CURL_POLL_IN : 0) | (events & ULOOP_WRITE ? CURL_POLL_OUT : 0);
   int running;
-  curl_multi_socket_action(sockinfo->curlmulti, sockinfo->ufd.fd, flags,
-                           &running);
+  curl_multi_socket_action(sockinfo->curlmulti, sockinfo->ufd.fd, flags, &running);
   check_multi_info(sockinfo->curlmulti);
   // DEBUG("exit");
 }
 
-static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp,
-                           void *socketp) {
+static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp, void *socketp) {
   // DEBUG_ENTER;
 
   (void)easy;
@@ -45,7 +42,7 @@ static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp,
   struct socket_info *sockinfo = socketp;
 
   if (what & CURL_POLL_REMOVE) {
-    if (!sockinfo) { // already removed
+    if (!sockinfo) {  // already removed
       // DEBUG_EXIT;
       return 0;
     }
@@ -54,7 +51,7 @@ static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp,
     // DEBUG("free %p", sockinfo);
     curl_multi_assign(client->curlmulti, s, NULL);
     free(sockinfo);
-    check_multi_info(client->curlmulti); // XXX: nazeka hitsuyou
+    check_multi_info(client->curlmulti);  // XXX: nazeka hitsuyou
   } else {
     if (!sockinfo) {
       sockinfo = malloc(sizeof *sockinfo);
@@ -63,16 +60,14 @@ static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp,
         return -1;
       }
 
-      *sockinfo = (struct socket_info){.curlmulti = client->curlmulti,
-                                       .ufd = {.cb = socket_handler, .fd = s}};
+      *sockinfo = (struct socket_info){.curlmulti = client->curlmulti, .ufd = {.cb = socket_handler, .fd = s}};
 
       curl_multi_assign(client->curlmulti, s, sockinfo);
     } else {
       uloop_fd_delete(&sockinfo->ufd);
     }
 
-    unsigned const flags = (what & CURL_POLL_IN ? ULOOP_READ : 0) |
-                           (what & CURL_POLL_OUT ? ULOOP_WRITE : 0);
+    unsigned const flags = (what & CURL_POLL_IN ? ULOOP_READ : 0) | (what & CURL_POLL_OUT ? ULOOP_WRITE : 0);
     uloop_fd_add(&sockinfo->ufd, flags);
   }
 
@@ -83,8 +78,7 @@ static int socket_callback(CURL *easy, curl_socket_t s, int what, void *userp,
 static void timeout_handler(struct uloop_timeout *t) {
   struct timer_info *timerinfo = container_of(t, struct timer_info, uto);
   int running;
-  curl_multi_socket_action(timerinfo->curlmulti, CURL_SOCKET_TIMEOUT, 0,
-                           &running);
+  curl_multi_socket_action(timerinfo->curlmulti, CURL_SOCKET_TIMEOUT, 0, &running);
   check_multi_info(timerinfo->curlmulti);
   free(timerinfo);
 }
@@ -167,8 +161,7 @@ struct mackerel_client *mackerel_client_alloc(struct mackerel_params params) {
     goto error;
   }
 
-  curl_multi_setopt(client->curlmulti, CURLMOPT_SOCKETFUNCTION,
-                    socket_callback);
+  curl_multi_setopt(client->curlmulti, CURLMOPT_SOCKETFUNCTION, socket_callback);
   curl_multi_setopt(client->curlmulti, CURLMOPT_SOCKETDATA, client);
   curl_multi_setopt(client->curlmulti, CURLMOPT_TIMERFUNCTION, timer_callback);
   curl_multi_setopt(client->curlmulti, CURLMOPT_TIMERDATA, client);
@@ -183,9 +176,8 @@ error:
 }
 
 // takes ownership of payload
-int mackerel_client_invoke(struct mackerel_client *client, char const *method,
-                           char const *path, struct json_object *payload,
-                           mackerel_request_callback cb, void *pdata) {
+int mackerel_client_invoke(struct mackerel_client *client, char const *method, char const *path,
+                           struct json_object *payload, mackerel_request_callback cb, void *pdata) {
   assert(path[0] == '/');
 
   struct json_request *req = json_request_alloc(payload, cb, pdata);

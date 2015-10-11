@@ -49,10 +49,7 @@ struct json_request *json_request_alloc(json_object *payload, mackerel_request_c
     ULOG_ERR("malloc failed.\n");
     goto error;
   }
-  *req = (struct json_request){
-      .cb = cb,
-      .pdata = pdata
-  };
+  *req = (struct json_request){.cb = cb, .pdata = pdata};
 
   req->tokener = json_tokener_new();
   if (!req->tokener) {
@@ -78,8 +75,7 @@ error:
   return NULL;
 }
 
-size_t json_request_read_callback(char *buffer, size_t size,
-                                         size_t nitems, void *instream) {
+size_t json_request_read_callback(char *buffer, size_t size, size_t nitems, void *instream) {
   struct json_request *req = instream;
 
   size_t const available = req->payload_length;
@@ -93,8 +89,7 @@ size_t json_request_read_callback(char *buffer, size_t size,
   return copied;
 }
 
-size_t json_request_write_callback(char *ptr, size_t size, size_t nmemb,
-                                          void *userdata) {
+size_t json_request_write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
   struct json_request *req = userdata;
   size_t const available = size * nmemb;
 
@@ -105,7 +100,7 @@ size_t json_request_write_callback(char *ptr, size_t size, size_t nmemb,
       req->result_object = obj;
     } else if (json_tokener_get_error(req->tokener) != json_tokener_continue) {
       ULOG_ERR("JSON parse error\n");
-      return 0; // signal error to curl
+      return 0;  // signal error to curl
     }
   }
 
@@ -120,9 +115,7 @@ struct curl_slist *json_request_headers_get(struct json_request *req) {
   return req->custom_headers;
 }
 
-CURL *json_request_handle(struct json_request *req) {
-  return req->curl;
-}
+CURL *json_request_handle(struct json_request *req) { return req->curl; }
 
 void json_request_setopts(struct json_request *req, char const *method, char const *url) {
   CURL *curl = req->curl;
@@ -132,12 +125,10 @@ void json_request_setopts(struct json_request *req, char const *method, char con
   curl_easy_setopt(curl, CURLOPT_PRIVATE, req);
 
   if (req->payload_buffer && req->payload_length > 0) {
-    ULOG_INFO("Request[%p]: payload %.*s\n", req,
-              req->payload_length, req->payload_buffer);
+    ULOG_INFO("Request[%p]: payload %.*s\n", req, req->payload_length, req->payload_buffer);
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, req->payload_length);
-    curl_easy_setopt(curl, CURLOPT_READFUNCTION,
-                     json_request_read_callback);
+    curl_easy_setopt(curl, CURLOPT_READFUNCTION, json_request_read_callback);
     curl_easy_setopt(curl, CURLOPT_READDATA, req);
     json_request_headers_append(req, "Content-Type: application/json");
   }
@@ -145,13 +136,12 @@ void json_request_setopts(struct json_request *req, char const *method, char con
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method);
   curl_easy_setopt(curl, CURLOPT_HTTPHEADER, req->custom_headers);
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION,
-                   json_request_write_callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, json_request_write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, req);
 }
 
 void json_request_invoke_callback(struct json_request *req, CURLcode code) {
-  if(req->cb) {
+  if (req->cb) {
     req->cb(code, req->result_object, req->pdata);
   }
 }

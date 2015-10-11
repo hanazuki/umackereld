@@ -5,9 +5,8 @@
 
 #include "api.h"
 
-int mackerel_client_invoke(struct mackerel_client *client, char const *method,
-                           char const *path, struct json_object *payload,
-                           mackerel_request_callback cb, void *pdata);
+int mackerel_client_invoke(struct mackerel_client *client, char const *method, char const *path,
+                           struct json_object *payload, mackerel_request_callback cb, void *pdata);
 
 struct json_request;
 void json_request_free(struct json_request *req);

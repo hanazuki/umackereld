@@ -32,7 +32,6 @@ void ppjson(CURLcode res, json_object *obj, void *p) {
   ULOG_INFO("[%d] %s\n", res, obj ? json_object_to_json_string(obj) : "(null)");
 }
 
-
 static void hostspec_timeout_handler(struct uloop_timeout *t);
 static void metrics_timeout_handler(struct uloop_timeout *t);
 
@@ -55,8 +54,7 @@ void create_host_callback(CURLcode res, json_object *obj, void *p) {
   if (res == 0) {
     if (obj && json_object_is_type(obj, json_type_object)) {
       json_object *id;
-      if (json_object_object_get_ex(obj, "id", &id) &&
-          json_object_is_type(id, json_type_string) &&
+      if (json_object_object_get_ex(obj, "id", &id) && json_object_is_type(id, json_type_string) &&
           hostid_set(json_object_get_string(id)) == 0) {
         goto ok;
       }
@@ -100,25 +98,23 @@ struct hostspec collect_hostspec() {
 
 static void hostspec_timeout_handler(struct uloop_timeout *t) {
   DEBUG_ENTER;
-  (void)t; // == &hostspec_timeout
+  (void)t;  // == &hostspec_timeout
 
   assert(mackerel_client);
 
   struct hostspec hostspec = collect_hostspec();
   if (hostid || hostid_get() == 0) {
     assert(hostid);
-    mackerel_update_host(mackerel_client, hostid, &hostspec,
-                         create_host_callback, NULL);
+    mackerel_update_host(mackerel_client, hostid, &hostspec, create_host_callback, NULL);
   } else {
-    mackerel_create_host(mackerel_client, &hostspec, create_host_callback,
-                         NULL);
+    mackerel_create_host(mackerel_client, &hostspec, create_host_callback, NULL);
   }
   DEBUG_EXIT;
 }
 
 static void metrics_timeout_handler(struct uloop_timeout *t) {
   DEBUG_ENTER;
-  (void)t; // == &metrics_timeout
+  (void)t;  // == &metrics_timeout
 
   metrics_collect_loadavg5(metrics_add);
   mackerel_update_metrics(mackerel_client, hostid, metrics_flush(), NULL, NULL);

@@ -30,20 +30,17 @@ json_object *hostspec_collect_block_device() {
     json_object_object_add(obj, name, obj_dev);
 
     char buf[1024], *p;
-    if ((p = fgets_close(buf, sizeof buf,
-                         fopenf("r", "/sys/block/%s/size", name)))) {
+    if ((p = fgets_close(buf, sizeof buf, fopenf("r", "/sys/block/%s/size", name)))) {
       int64_t size;
       if (json_parse_int64(p, &size) == 0) {
         json_object_object_add(obj_dev, "size", json_object_new_int64(size));
       }
     }
 
-    if ((p = fgets_close(buf, sizeof buf,
-                         fopenf("r", "/sys/block/%s/removable", name)))) {
+    if ((p = fgets_close(buf, sizeof buf, fopenf("r", "/sys/block/%s/removable", name)))) {
       int64_t removable;
       if (json_parse_int64(p, &removable) == 0) {
-        json_object_object_add(obj_dev, "removable",
-                               json_object_new_int64(removable));
+        json_object_object_add(obj_dev, "removable", json_object_new_int64(removable));
       }
     }
   }

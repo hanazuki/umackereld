@@ -29,8 +29,7 @@ json_object *hostspec_collect_cpu() {
     // Only send the model name for now: this should work for x86/amd64/arm/mips
     if (obj_proc) {
       if (begin_with(p, "cpu model\t") || begin_with(p, "model name\t")) {
-        json_object_object_add(obj_proc, "model_name",
-                               json_object_new_string(after_colon(p)));
+        json_object_object_add(obj_proc, "model_name", json_object_new_string(after_colon(p)));
       }
     }
   }

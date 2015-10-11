@@ -8,11 +8,10 @@
 #include "stringutil.h"
 #include "log.h"
 
-#define FIELD(Fjson, Fmeminfo)                                                 \
-  if (begin_with(p, Fmeminfo ":")) {                                           \
-    json_object_object_add(obj, Fjson,                                         \
-                           json_object_new_string(after_colon(p)));            \
-    continue;                                                                  \
+#define FIELD(Fjson, Fmeminfo)                                                  \
+  if (begin_with(p, Fmeminfo ":")) {                                            \
+    json_object_object_add(obj, Fjson, json_object_new_string(after_colon(p))); \
+    continue;                                                                   \
   }
 
 json_object *hostspec_collect_memory() {

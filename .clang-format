@@ -1,0 +1,7 @@
+# -*- yaml -*-
+BasedOnStyle: LLVM
+AlignEscapedNewlinesLeft: true
+ColumnLimit: 120
+IndentCaseLabels: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+SpacesBeforeTrailingComments: 2

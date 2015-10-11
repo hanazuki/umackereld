@@ -10,8 +10,7 @@ struct global_options global_options;
 struct uci_context *uci_context;
 struct uci_package *uci_package;
 
-static struct uci_section *find_uci_section_by_type(struct uci_package *package,
-                                                    char const *type) {
+static struct uci_section *find_uci_section_by_type(struct uci_package *package, char const *type) {
   struct uci_element *p;
   uci_foreach_element(&package->sections, p) {
     struct uci_section *const ps = uci_to_section(p);
@@ -24,22 +23,19 @@ static struct uci_section *find_uci_section_by_type(struct uci_package *package,
 }
 
 int load_globals(struct uci_context *ctx, struct uci_package *package) {
-  struct uci_section *section_global =
-      find_uci_section_by_type(package, "mackerel");
+  struct uci_section *section_global = find_uci_section_by_type(package, "mackerel");
   if (!section_global) {
     ULOG_ERR("No mackerel section found in config\n");
     return -1;
   }
 
-  global_options.apikey =
-      uci_lookup_option_string(ctx, section_global, "apikey");
+  global_options.apikey = uci_lookup_option_string(ctx, section_global, "apikey");
   if (!global_options.apikey) {
     ULOG_ERR("Option mackerel.apikey is required.\n");
     return -1;
   }
 
-  global_options.hostname =
-      uci_lookup_option_string(ctx, section_global, "hostname");
+  global_options.hostname = uci_lookup_option_string(ctx, section_global, "hostname");
 
   return 0;
 }

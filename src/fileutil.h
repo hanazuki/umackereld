@@ -3,8 +3,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-FILE *fopenf(char const *mode, char const *fmt, ...)
-    __attribute__((format(printf, 2, 3)));
+FILE *fopenf(char const *mode, char const *fmt, ...) __attribute__((format(printf, 2, 3)));
 
 FILE *vfopenf(char const *mode, char const *fmt, va_list ap);
 
