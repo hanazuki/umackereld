@@ -1,0 +1,19 @@
+language: c
+cache:
+  directories:
+    - /tmp/OpenWrt-SDK-archive
+env:
+  global:
+  - SDK_PATH=/tmp/OpenWrt-SDK
+  - SDK_ARCHIVE_DIR=/tmp/OpenWrt-SDK-archive
+  - SDK_ARCHIVE=$SDK_ARCHIVE_DIR/OpenWRT-SDK.tar.bz2
+  - SDK_URL=https://downloads.openwrt.org/chaos_calmer/15.05/x86/64/OpenWrt-SDK-15.05-x86-64_gcc-4.8-linaro_uClibc-0.9.33.2.Linux-x86_64.tar.bz2
+  - PATH="$SDK_PATH/staging_dir/host/bin:$SDK_PATH/staging_dir/toolchain-x86_64_gcc-4.8-linaro_uClibc-0.9.33.2:$PATH"
+  - PERL5LIB="$SDK_PATH/staging_dir/host/share/autoconf:$SDK_PATH/staging_dir/host/share/automake-1.15"
+install:
+  - test -f $SDK_ARCHIVE || (mkdir -p $SDK_ARCHIVE_DIR && wget -O $SDK_ARCHIVE $SDK_URL)
+  - mkdir -p $SDK_PATH && tar xf $SDK_ARCHIVE -C $SDK_PATH --strip-components 1
+  - ls $SDK_PATH
+script:
+  - autoreconf --install
+  - make
