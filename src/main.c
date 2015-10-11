@@ -22,6 +22,7 @@ static char const *const api_beseuri = "https://mackerel.io";
 #define SOON ONE_SECOND_IN_MILLISEC
 
 static int hostspec_update_interval = ONE_HOUR_IN_MILLISEC;
+static int hostspec_update_retry_interval = ONE_MINUTE_IN_MILLISEC;
 static int metrics_update_interval = ONE_MINUTE_IN_MILLISEC;
 
 static struct mackerel_client *mackerel_client;
@@ -52,20 +53,25 @@ void create_host_callback(CURLcode res, json_object *obj, void *p) {
   (void)p;
 
   if (res == 0) {
-    if (json_object_is_type(obj, json_type_object)) {
+    if (obj && json_object_is_type(obj, json_type_object)) {
       json_object *id;
       if (json_object_object_get_ex(obj, "id", &id) &&
-          json_object_is_type(id, json_type_string)) {
-        if (hostid_set(json_object_get_string(id)) == 0) {
-          schedule_metrics_update(SOON);
-        }
+          json_object_is_type(id, json_type_string) &&
+          hostid_set(json_object_get_string(id)) == 0) {
         goto ok;
       }
     }
-    DEBUG("Malformed JSON");
+    ULOG_WARN("Hostspec update received malformed JSON.\n");
+  } else {
+    ULOG_WARN("Hostspec update failed: %s.\n", curl_easy_strerror(res));
   }
 
+  // Something wrong happened.
+  schedule_hostspec_update(hostspec_update_retry_interval);
+  return;
+
 ok:
+  schedule_metrics_update(SOON);
   schedule_hostspec_update(hostspec_update_interval);
 }
 
