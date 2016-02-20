@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <dirent.h>
+#include <errno.h>
 #include <stdint.h>
 #include <string.h>
 #include <libubox/ulog.h>
@@ -13,7 +14,7 @@ json_object *hostspec_collect_block_device() {
 
   DIR *dir = opendir("/sys/block");
   if (!dir) {
-    ULOG_ERR("Unable to open /sys/block\n");
+    ULOG_ERR("Unable to open /sys/block: %s\n", strerror(errno));
     goto error;
   }
 

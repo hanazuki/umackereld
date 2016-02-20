@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 
 #include "api_internal.h"
@@ -46,7 +47,7 @@ void json_request_free(struct json_request *req) {
 struct json_request *json_request_alloc(json_object *payload, mackerel_request_callback cb, void *pdata) {
   struct json_request *req = malloc(sizeof *req);
   if (!req) {
-    ULOG_ERR("malloc failed.\n");
+    ULOG_ERR("malloc failed: %s\n", strerror(errno));
     goto error;
   }
   *req = (struct json_request){.cb = cb, .pdata = pdata};
@@ -98,9 +99,12 @@ size_t json_request_write_callback(char *ptr, size_t size, size_t nmemb, void *u
 
     if (obj) {
       req->result_object = obj;
-    } else if (json_tokener_get_error(req->tokener) != json_tokener_continue) {
-      ULOG_ERR("JSON parse error\n");
-      return 0;  // signal error to curl
+    } else {
+      enum json_tokener_error const err = json_tokener_get_error(req->tokener);
+      if (err != json_tokener_continue) {
+        ULOG_ERR("JSON parse error: %s\n", json_tokener_error_desc(err));
+        return 0;  // signal error to curl
+      }
     }
   }
 

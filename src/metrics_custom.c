@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -69,14 +70,14 @@ static void metrics_process_callback(struct uloop_process *c, int ret) {
 void metrics_collect_custom(collector_callback yield, char const *command) {
   FILE *tfp = tmpfile();
   if(!tfp) {
-    ULOG_ERR("tmpfile failed.\n");
+    ULOG_ERR("tmpfile failed: %s\n", strerror(errno));
     return;
   }
 
   pid_t pid = fork();
   switch (pid) {
     case -1:  // error
-      ULOG_ERR("fork failed.\n");
+      ULOG_ERR("fork failed: %s\n", strerror(errno));
       fclose(tfp);
       return;
     case 0: {  // child
@@ -85,7 +86,7 @@ void metrics_collect_custom(collector_callback yield, char const *command) {
 
       execv("/bin/sh", (char *[]){"sh", "-c", strdup(command), NULL});
 
-      ULOG_ERR("execv failed.\n");
+      ULOG_ERR("execv failed: %s\n", strerror(errno));
       _exit(-1);
     }
     default: {  // parent
@@ -93,7 +94,7 @@ void metrics_collect_custom(collector_callback yield, char const *command) {
 
       struct metrics_process *p = malloc(sizeof *p);
       if (!p) {
-        ULOG_ERR("malloc failed.\n");
+        ULOG_ERR("malloc failed: %s\n", strerror(errno));
         fclose(tfp);
         return;
       }

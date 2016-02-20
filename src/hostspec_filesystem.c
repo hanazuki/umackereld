@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <mntent.h>
@@ -14,7 +15,7 @@ json_object *hostspec_collect_filesystem() {
 
   FILE *fp = setmntent("/proc/mounts", "r");
   if (!fp) {
-    ULOG_ERR("Unable to open /proc/mounts\n");
+    ULOG_ERR("Unable to open /proc/mounts: %s\n", strerror(errno));
     goto error;
   }
 

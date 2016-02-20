@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <errno.h>
+#include <string.h>
 #include <json-c/json.h>
 #include <libubox/uloop.h>
 
@@ -94,7 +96,7 @@ static int timer_callback(CURLM *multi, long timeout_ms, void *userp) {
   } else {
     struct timer_info *timerinfo = malloc(sizeof *timerinfo);
     if (!timerinfo) {
-      ULOG_ERR("malloc failed.\n");
+      ULOG_ERR("malloc failed: %s\n", strerror(errno));
       return -1;
     }
 
@@ -149,7 +151,7 @@ struct mackerel_client *mackerel_client_alloc(struct mackerel_params params) {
   // DEBUG_ENTER;
   struct mackerel_client *client = malloc(sizeof *client);
   if (!client) {
-    ULOG_ERR("malloc failed.\n");
+    ULOG_ERR("malloc failed: %s\n", strerror(errno));
     goto error;
   }
   client->params = params;

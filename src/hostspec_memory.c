@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
@@ -20,7 +21,7 @@ json_object *hostspec_collect_memory() {
 
   FILE *fp = fopen("/proc/meminfo", "r");
   if (!fp) {
-    ULOG_ERR("Unable to open /proc/meminfo\n");
+    ULOG_ERR("Unable to open /proc/meminfo: %s\n", strerror(errno));
     goto error;
   }
 

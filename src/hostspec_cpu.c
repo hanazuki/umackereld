@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <libubox/ulog.h>
@@ -12,7 +13,7 @@ json_object *hostspec_collect_cpu() {
 
   FILE *fp = fopen("/proc/cpuinfo", "r");
   if (!fp) {
-    ULOG_ERR("Unable to open /proc/cpuinfo\n");
+    ULOG_ERR("Unable to open /proc/cpuinfo: %s\n", strerror(errno));
     goto error;
   }
 
